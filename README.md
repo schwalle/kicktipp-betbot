@@ -1,3 +1,7 @@
+![kicktipp-img]
+
+[kicktipp-img]: https://www.kicktipp.de/assets/img/cb1059167120/assets/img/illu/startseite.png "Kicktipp"
+
 kicktipp-betbot
 ===============
 
@@ -14,9 +18,15 @@ Getting started
 ---------------
 
 The tool is designed as python command-line application and is intended to be used in conjunction with e.g. cron jobs.
-In order to achieve this the tool is two folded.
+It is also possible to use it interactively.
+
+The main goal is to use this betbot non interactivly, therefore two steps are required to get it work.
+
+1. Generate a login token for later use
+2. Call the betbot with the generated login token
 
 ### Generate a login token
+If yout dont want to use the betbot interactively you must generate a login token.
 The first task is to generate a login token. Fortunately the kicktipp website provides a login cookie that is used for this purpose.
 
 ```console
@@ -53,6 +63,7 @@ $ kicktippbb.py --use-login-token c3HfazFh6sd mycommunityname
 ```
 
 ### Taming the daemon
+Some useful options to tweak the behavior of the betbot.
 
 #### Deadline:
 If you want the betbot to pick up the slack only in the last minute, there are some options you might consider using.
@@ -72,6 +83,9 @@ $ kicktippbb.py --use-login-token c3HfazFh6sd  mycommunityname
 ...
 ```
 Specifying the ```--overide-bets``` option will ignore already placed bets and override former placed bets.
+
+#### Testing the outcome:
+If you don't want the betbot to carry out any operations on your games you can add the ```--dry-run``` parameter. This prevents the betbot from submitting any bets to your prediction games.
 
 ### Match Predictor Functions
 By default the betbot uses a rather simple prediction algorithm called 'SimplePredictor'. You can specify a predictor method by using the ```--predictor``` parameter.

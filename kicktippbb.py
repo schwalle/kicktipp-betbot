@@ -23,20 +23,21 @@ Options:
     --dry-run                   Dont place any bet just print out predicitons
 """
 
-from robobrowser import RoboBrowser
-from bs4 import BeautifulSoup
-from docopt import docopt
+import datetime
 import getpass
+import inspect
 import math
 import re
 import sys
-from match import Match
+
 import more_itertools
-import prediction
-import inspect
-from deadline import is_before_dealine
-from deadline import timedelta_tostring
-import datetime 
+from bs4 import BeautifulSoup
+from docopt import docopt
+from robobrowser import RoboBrowser
+
+import src.prediction
+from src.deadline import is_before_dealine, timedelta_tostring
+from src.match import Match
 
 URL_BASE = 'http://www.kicktipp.de'
 URL_LOGIN = URL_BASE + '/info/profil/login'
