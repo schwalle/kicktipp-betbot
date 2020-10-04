@@ -150,7 +150,7 @@ def intersection(a, b):
     return i
 
 
-def place_bets(browser: RoboBrowser, communities: list, predictor, override=False, deadline=None):
+def place_bets(browser: RoboBrowser, communities: list, predictor, override=False, deadline=None, dryrun=False):
     """Place bets on all given communities."""
     for com in communities:
         matches = parse_match_rows(browser, com)
@@ -176,7 +176,10 @@ def place_bets(browser: RoboBrowser, communities: list, predictor, override=Fals
             print("{0} - betting {1}:{2}".format(match, homebet, roadbet))
             submitform[field_hometeam.attrs['name']] = homebet
             submitform[field_roadteam.attrs['name']] = roadbet
-        browser.submit_form(submitform, submit='submitbutton')
+        if not dryrun:
+            browser.submit_form(submitform, submit='submitbutton')
+        else:
+            print("Dry run, no bets were placed")
         
 
 def validate_arguments(arguments):
@@ -242,7 +245,7 @@ def main(arguments):
 
     # Place bets
     place_bets(browser, communities, predictor,
-               override=arguments['--override-bets'], deadline=arguments['--deadline'])
+               override=arguments['--override-bets'], deadline=arguments['--deadline'], dryrun=arguments['--dry-run'])
 
 
 if __name__ == '__main__':
