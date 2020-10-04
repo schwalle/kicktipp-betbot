@@ -7,7 +7,7 @@ Unless specified by parameter it places the bets on all prediction games of the 
 Usage: 
     kicktippbb.py [ --get-login-token ]
     kicktippbb.py [ --list-predictors ]
-    kicktippbb.py [--use-login-token <token> ] [--override-bets] [--deadline <duration>] [--predictor <value>] [COMMUNITY]...
+    kicktippbb.py [--use-login-token <token> ] [--dry-run] [--override-bets] [--deadline <duration>] [--predictor <value>] [COMMUNITY]...
 
 Options:
     COMMUNITY                   Name of the prediction game comunity to place bets, 
@@ -20,7 +20,9 @@ Options:
                                 The duration format is <number><unit[m,h,d]>, e.g. 10m,5h or 1d
     --list-predictors           Display a list of predictors available to be used with '--predictor' option
     --predictor <value>         A specific predictor name to be used during calculation
+    --dry-run                   Dont place any bet just print out predicitons
 """
+
 from robobrowser import RoboBrowser
 from bs4 import BeautifulSoup
 from docopt import docopt
@@ -32,11 +34,14 @@ from match import Match
 import more_itertools
 import prediction
 import inspect
+from deadline import is_before_dealine
+import datetime 
 
 URL_BASE = 'http://www.kicktipp.de'
 URL_LOGIN = URL_BASE + '/info/profil/login'
 
 DEADLINE_REGEX = re.compile('([1-9][0-9]*)(m|h|d)')
+
 
 def login(browser: RoboBrowser):
     """Log into the user account by asking for username and password.
@@ -50,7 +55,8 @@ def login(browser: RoboBrowser):
         else:
             return browser.session.cookies['login']
 
-def perform_login(browser: RoboBrowser, username:str, password:str):
+
+def perform_login(browser: RoboBrowser, username: str, password: str):
     """
     Open the log in page then fill out the form and submit 
     """
@@ -60,14 +66,16 @@ def perform_login(browser: RoboBrowser, username:str, password:str):
     form['passwort'] = password
     browser.submit_form(form)
 
+
 def get_credentials():
     """
     Ask the user for the credentials.
     """
     username = input("Username: ")
     password = getpass.getpass(prompt='Password: ')
-    return username, password      
-                
+    return username, password
+
+
 def logged_in(browser: RoboBrowser):
     """
     Returns true if we are still on the login page
@@ -75,25 +83,35 @@ def logged_in(browser: RoboBrowser):
     login_div = browser.find('div', content="Login")
     return True if not login_div else False
 
+
 def get_table_rows(soup):
     """
     Get all table rows from the first tbody element found in soup parameter
     """
-    tbody=soup.find('tbody')
+    tbody = soup.find('tbody')
     return [tr.find_all('td') for tr in tbody.find_all('tr')]
 
-def fetch_matches(browser: RoboBrowser, community):
-    """Fetch latest odds for each match"""
+
+def parse_match_rows(browser: RoboBrowser, community):
+    """Fetch latest odds for each match
+    Returns a list of tuples (heimtipp,gasttipp, match)
+    """
     browser.open(URL_BASE + '/' + community + '/tippabgabe')
-    
+
     content = get_kicktipp_content(browser)
     rows = get_table_rows(content)
-    matches = [Match(row[1].get_text(), row[2].get_text(), row[0].get_text(), row[4].get_text(), row[5].get_text(), row[6].get_text()) for row in rows]
-    for m1, m2 in more_itertools.pairwise(matches):
-        if not m2.match_date:
-            m2.match_date = m1.match_date
 
-    return matches
+    matchtuple=list()
+    for row in rows:
+        heimtipp = row[3].find('input', id=lambda x: x and x.endswith('_heimTipp'))
+        gasttipp = row[3].find('input', id=lambda x: x and x.endswith('_gastTipp'))
+        match = Match(row[1].get_text(), row[2].get_text(), row[0].get_text(), row[4].get_text(), row[5].get_text(), row[6].get_text())
+        if not match.match_date:
+            match.match_date = lastmatch.match_date
+        lastmatch = match
+        matchtuple.append((heimtipp,gasttipp,match))
+
+    return matchtuple
 
 
 def get_kicktipp_content(browser: RoboBrowser):
@@ -106,61 +124,89 @@ def get_kicktipp_content(browser: RoboBrowser):
     return None
 
 
-def get_communities(browser: RoboBrowser , desired_communities: list):
+def get_communities(browser: RoboBrowser, desired_communities: list):
     """
     Get a list of all communities of the user
     """
     browser.open(URL_BASE + '/info/profil/meinetipprunden')
     content = get_kicktipp_content(browser)
     links = content.find_all('a')
-    is_community = lambda link: link.get('href').replace("/","") == link.get_text()
-    community_list = [link.get_text() for link in links if is_community(link)]
+    gethreftext = lambda l : l.get('href').replace("/", "")
+    def is_community(link): 
+        hreftext = gethreftext(link)
+        if hreftext == link.get_text(): 
+            return True
+        else:
+            linkdiv= link.find('div', {'class':"menu-title-mit-tippglocke"})
+            return linkdiv and linkdiv.get_text() == hreftext
+    community_list = [gethreftext(link) for link in links if is_community(link)]
     if len(desired_communities) > 0:
         return intersection(community_list, desired_communities)
     return community_list
+
 
 def intersection(a, b):
     i = [x for x in a if x in b]
     return i
 
-def place_bets(browser: RoboBrowser, communities:list, predictor, override=False, deadline=None):
-    """Place bets on all given urls."""
+
+def place_bets(browser: RoboBrowser, communities: list, predictor, override=False, deadline=None):
+    """Place bets on all given communities."""
     for com in communities:
-        matches = fetch_matches(browser, com)
-        for match in matches:
-            tip = predictor.predict(match)
-            print("{0} - {1} ({2};{3};{4})  {5}:{6}".format(match.hometeam, match.roadteam, match.rate_home, match.rate_deuce, match.rate_road, tip[0], tip[1]))            
+        matches = parse_match_rows(browser, com)
+        submitform = browser.get_form()
+        for field_hometeam, field_roadteam, match in matches:
+            if not field_hometeam or not field_roadteam:
+                print("{0} - no bets possible".format(match))
+                continue
 
-    #TODO: Fill the forms with the game prediction
-    #TODO: Consider bet placement timeout
-    #TODO: Consider override parameter
+            input_hometeam_value = submitform[field_hometeam.attrs['name']].value
+            input_roadteam_value = submitform[field_roadteam.attrs['name']].value
+            if not override and (input_hometeam_value or input_roadteam_value):
+                print("{0} - skipped, already placed {1}:{2}".format(match, input_hometeam_value, input_roadteam_value))
+                continue
 
+            if deadline != None:
+                if not is_before_dealine(deadline, match.match_date):
+                    time_to_match = match.match_date - datetime.datetime.now()
+                    print("{0} - not betting yet, due in {2}".format(match, time_to_match))
+                    continue                    
+
+            homebet,roadbet = predictor.predict(match)
+            print("{0} - betting {1}:{2}".format(match, homebet, roadbet))
+            submitform[field_hometeam.attrs['name']] = homebet
+            submitform[field_roadteam.attrs['name']] = roadbet
+        browser.submit_form(submitform, submit='submitbutton')
+        
 
 def validate_arguments(arguments):
     if arguments['--deadline']:
         deadline_value = arguments['--deadline']
-        
-        if not re.match(DEADLINE_REGEX, deadline_value):            
-            exit("Invalid deadline value ({}), use <Number><Unit>, Unit=[m,h,d]".format(deadline_value))
+
+        if not re.match(DEADLINE_REGEX, deadline_value):
+            exit("Invalid deadline value ({}), use <Number><Unit>, Unit=[m,h,d]".format(
+                deadline_value))
+
 
 def choose_predictor(predictor_param, predictors):
-    if(predictor_param):         
+    if(predictor_param):
         if(predictor_param in predictors):
             predictor = predictors[predictor_param]()
         else:
-            exit ('Unknown predictor: {}'.format(predictor_param))
+            exit('Unknown predictor: {}'.format(predictor_param))
     else:
         predictor = predictors['SimplePredictor']()
+    print("Using predictor: "+type(predictor).__name__)
     return predictor
-    
+
 
 def get_predictors():
-    return dict( (name, obj) for name, obj in inspect.getmembers(sys.modules['prediction'], predicate=inspect.isclass) if 'predict' in [x for x,y in inspect.getmembers(obj, predicate=inspect.isfunction) if x == 'predict'])
+    return dict((name, obj) for name, obj in inspect.getmembers(sys.modules['prediction'], predicate=inspect.isclass) if 'predict' in [x for x, y in inspect.getmembers(obj, predicate=inspect.isfunction) if x == 'predict'])
 
 
 def main(arguments):
     browser = RoboBrowser(parser="html.parser")
-    
+
     validate_arguments(arguments)
     predictors = get_predictors()
 
@@ -169,7 +215,7 @@ def main(arguments):
         token = login(browser)
         print(token)
         exit()
-    
+
     # Just list the predictors at hand and exit
     if arguments['--list-predictors']:
         [print(key) for key in predictors.keys()]
@@ -182,22 +228,23 @@ def main(arguments):
         token = login(browser)
 
     communities = arguments['COMMUNITY']
-    #Just use the token for all interactions with the website
+    # Just use the token for all interactions with the website
     browser.session.cookies['login'] = token
-    
+
     # Which communities are considered, fail if no were found
     communities = get_communities(browser, communities)
     if(len(communities) == 0):
         exit("No community found!?")
-        
+
     # Which prediction method is used
     predictor_param = arguments['--predictor'] if '--predictor' in arguments else None
     predictor = choose_predictor(predictor_param, predictors)
 
     # Place bets
-    place_bets(browser, communities, predictor, override=arguments['--override-bets'], deadline=arguments['--deadline'])
-            
+    place_bets(browser, communities, predictor,
+               override=arguments['--override-bets'], deadline=arguments['--deadline'])
+
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='KickTipp BetBot 1.0')
-    main(arguments)    
+    main(arguments)

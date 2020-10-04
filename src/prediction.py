@@ -30,10 +30,10 @@ class SimplePredictor(object):
 
 
 class CalculationPredictor(object):
-    MAX_GOALS = 6
-    DOMINATION_THRESHOLD = 10
-    DRAW_THRESHOLD = 1.5
-    NONLINEARITY = 0.6
+    MAX_GOALS = 5
+    DOMINATION_THRESHOLD = 9
+    DRAW_THRESHOLD = 1.3
+    NONLINEARITY = 0.5
 
     def predict(self, match: Match):
 
