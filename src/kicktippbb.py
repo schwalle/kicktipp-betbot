@@ -35,6 +35,7 @@ import more_itertools
 import prediction
 import inspect
 from deadline import is_before_dealine
+from deadline import timedelta_tostring
 import datetime 
 
 URL_BASE = 'http://www.kicktipp.de'
@@ -153,6 +154,7 @@ def intersection(a, b):
 def place_bets(browser: RoboBrowser, communities: list, predictor, override=False, deadline=None, dryrun=False):
     """Place bets on all given communities."""
     for com in communities:
+        print("Community: {0}".format(com))
         matches = parse_match_rows(browser, com)
         submitform = browser.get_form()
         for field_hometeam, field_roadteam, match in matches:
@@ -169,7 +171,7 @@ def place_bets(browser: RoboBrowser, communities: list, predictor, override=Fals
             if deadline != None:
                 if not is_before_dealine(deadline, match.match_date):
                     time_to_match = match.match_date - datetime.datetime.now()
-                    print("{0} - not betting yet, due in {2}".format(match, time_to_match))
+                    print("{0} - not betting yet, due in {1}".format(match, timedelta_tostring(time_to_match)))
                     continue                    
 
             homebet,roadbet = predictor.predict(match)
@@ -217,12 +219,12 @@ def main(arguments):
     if arguments['--get-login-token']:
         token = login(browser)
         print(token)
-        exit()
+        exit(0)
 
     # Just list the predictors at hand and exit
     if arguments['--list-predictors']:
         [print(key) for key in predictors.keys()]
-        exit()
+        exit(0)
 
     # Use login token pass by argument or let the caller log in right here
     if arguments['--use-login-token']:
