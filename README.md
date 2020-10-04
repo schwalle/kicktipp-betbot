@@ -88,7 +88,7 @@ Specifying the ```--overide-bets``` option will ignore already placed bets and o
 If you don't want the betbot to carry out any operations on your games you can add the ```--dry-run``` parameter. This prevents the betbot from submitting any bets to your prediction games.
 
 ### Match Predictor Functions
-By default the betbot uses a rather simple prediction algorithm called 'SimplePredictor'. You can specify a predictor method by using the ```--predictor``` parameter.
+By default the betbot uses a rather simple prediction algorithm called 'SimplePredictor'. You can specify a predictor method by using the ```--predictor <predictorname>``` parameter.
 
 ```console
 $ kicktippbb.py --use-login-token c3HfazFh6sd --predictor CalculationPredictor mycommunityname
@@ -97,3 +97,32 @@ $ kicktippbb.py --use-login-token c3HfazFh6sd --predictor CalculationPredictor m
 
 The prediction functions reside in the predition.py module and can be extended at will. The name of the function must match the parameter value, it will be looked up in the module and used for match result prediciton.
 
+### Usage 
+
+Here the usage:
+```console
+$ kicktippbb.py --help
+KickTipp BetBot 
+Automated kicktipp.de bet palcement.
+
+Places bets to the upcomming matchday.  
+Unless specified by parameter it places the bets on all prediction games of the account.
+
+Usage: 
+    kicktippbb.py [ --get-login-token ]
+    kicktippbb.py [ --list-predictors ]
+    kicktippbb.py [--use-login-token <token> ] [--dry-run] [--override-bets] [--deadline <duration>] [--predictor <value>] [COMMUNITY]...
+
+Options:
+    COMMUNITY                   Name of the prediction game comunity to place bets, 
+                                one or more names ca be specified
+    --get-login-token           Just login and print the login token string 
+                                for later use with '--use-login-token' option
+    --use-login-token <token>   Perform bets without interactive login, use login token insted.
+    --override-bets             Override already placed bets.
+    --deadline <duration>       Place bets only on matches starting within the given duration.                                
+                                The duration format is <number><unit[m,h,d]>, e.g. 10m,5h or 1d
+    --list-predictors           Display a list of predictors available to be used with '--predictor' option
+    --predictor <value>         A specific predictor name to be used during calculation
+    --dry-run                   Dont place any bet just print out predicitons
+```
