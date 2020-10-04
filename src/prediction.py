@@ -2,7 +2,7 @@
 This module holds all preditors used by kicktipp bet bot.
 A generator is a class that defines a method 'predict' with one argument.
 """
-from match import Match
+from src.match import Match
 import random
 import math
 
