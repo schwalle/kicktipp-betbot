@@ -35,9 +35,9 @@ from bs4 import BeautifulSoup
 from docopt import docopt
 from robobrowser import RoboBrowser
 
-import src.prediction
-from src.deadline import is_before_dealine, timedelta_tostring
-from src.match import Match
+import predictors.base
+from helper.deadline import is_before_dealine, timedelta_tostring
+from helper.match import Match
 
 URL_BASE = 'http://www.kicktipp.de'
 URL_LOGIN = URL_BASE + '/info/profil/login'
@@ -201,20 +201,17 @@ def choose_predictor(predictor_param, predictors):
         else:
             exit('Unknown predictor: {}'.format(predictor_param))
     else:
-        predictor = predictors['SimplePredictor']()
+        # Just get the first predictor in the dict and instanciate it
+        predictor = next(iter(predictors.values()))()
     print("Using predictor: "+type(predictor).__name__)
     return predictor
-
-
-def get_predictors():
-    return dict((name, obj) for name, obj in inspect.getmembers(sys.modules['prediction'], predicate=inspect.isclass) if 'predict' in [x for x, y in inspect.getmembers(obj, predicate=inspect.isfunction) if x == 'predict'])
 
 
 def main(arguments):
     browser = RoboBrowser(parser="html.parser")
 
     validate_arguments(arguments)
-    predictors = get_predictors()
+    predictors_ = predictors.base.get_predictors()
 
     # Log in to kicktipp and print out the login cookie value
     if arguments['--get-login-token']:
@@ -224,7 +221,7 @@ def main(arguments):
 
     # Just list the predictors at hand and exit
     if arguments['--list-predictors']:
-        [print(key) for key in predictors.keys()]
+        [print(key) for key in predictors_.keys()]
         exit(0)
 
     # Use login token pass by argument or let the caller log in right here
@@ -244,7 +241,7 @@ def main(arguments):
 
     # Which prediction method is used
     predictor_param = arguments['--predictor'] if '--predictor' in arguments else None
-    predictor = choose_predictor(predictor_param, predictors)
+    predictor = choose_predictor(predictor_param, predictors_)
 
     # Place bets
     place_bets(browser, communities, predictor,
