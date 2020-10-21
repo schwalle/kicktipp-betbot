@@ -1,35 +1,12 @@
 """
-This module holds all preditors used by kicktipp bet bot.
-A generator is a class that defines a method 'predict' with one argument.
+Simple preditor for kicktipp bet bot.
 """
-from src.match import Match
+from helper.match import Match
+from .base import PredictorBase
 import random
 import math
 
-
-class SimplePredictor(object):
-    DOMINATION_THRESHOLD = 6
-    DRAW_THRESHOLD = 1.2
-    
-    def predict(self, match: Match):
-
-        diff = math.fabs(match.rate_home - match.rate_road)
-        home_wins = match.rate_home < match.rate_road
-
-        if diff < self.DRAW_THRESHOLD:
-            return (1, 1)
-
-        if diff >= self.DOMINATION_THRESHOLD:
-            result = (3, 1)
-        elif diff >= self.DOMINATION_THRESHOLD / 2:
-            result = (2, 1)
-        else:
-            result = (1, 0)
-
-        return result if home_wins else tuple(reversed(result))
-
-
-class CalculationPredictor(object):
+class CalculationPredictor(PredictorBase):
     MAX_GOALS = 5
     DOMINATION_THRESHOLD = 9
     DRAW_THRESHOLD = 1.3

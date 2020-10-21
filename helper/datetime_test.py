@@ -1,5 +1,5 @@
 import pytest
-from src import deadline
+from helper import deadline
 from datetime import datetime
 from datetime import timedelta
 
