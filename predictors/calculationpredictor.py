@@ -1,10 +1,10 @@
 """
-Simple preditor for kicktipp bet bot.
+Calculation preditor for kicktipp bet bot.
 """
 from helper.match import Match
 from .base import PredictorBase
-import random
 import math
+
 
 class CalculationPredictor(PredictorBase):
     MAX_GOALS = 5
@@ -21,10 +21,11 @@ class CalculationPredictor(PredictorBase):
 
         totalGoals = round(
             min((difference / self.DOMINATION_THRESHOLD), 1) * self.MAX_GOALS)
-        ratio = ((match.rate_home / match.rate_road if match.rate_home > match.rate_road else match.rate_road / match.rate_home) / (match.rate_home + match.rate_road)) ** self.NONLINEARITY
+        ratio = ((match.rate_home / match.rate_road if match.rate_home > match.rate_road else match.rate_road /
+                  match.rate_home) / (match.rate_home + match.rate_road)) ** self.NONLINEARITY
 
-        winner=round(totalGoals * ratio)
-        looser=round(totalGoals * (1.0 - ratio))
+        winner = round(totalGoals * ratio)
+        looser = round(totalGoals * (1.0 - ratio))
 
         if winner <= looser:
             winner += 1

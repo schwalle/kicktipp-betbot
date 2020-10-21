@@ -3,14 +3,13 @@ Simple preditor for kicktipp bet bot.
 """
 from helper.match import Match
 from .base import PredictorBase
-import random
 import math
 
 
 class SimplePredictor(PredictorBase):
     DOMINATION_THRESHOLD = 6
     DRAW_THRESHOLD = 1.2
-    
+
     def predict(self, match: Match):
 
         diff = math.fabs(match.rate_home - match.rate_road)

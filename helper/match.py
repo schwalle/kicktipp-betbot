@@ -16,7 +16,10 @@ class Match(object):
         self.__rate_road = float(rate_road)
 
     def __str__(self):
-        return self.__match_date.strftime("%d.%m.%Y %H:%M") + " '" + self.__hometeam + "' vs. '" + self.__roadteam + "' " + " (" + str(self.__rate_home)+";" + str(self.__rate_deuce)+";" + str(self.__rate_road) + ")"
+        return self.__match_date.strftime("%d.%m.%Y %H:%M") \
+            + " '" + self.__hometeam \
+            + "' vs. '" + self.__roadteam \
+            + "' " + " (" + str(self.__rate_home)+";" + str(self.__rate_deuce)+";" + str(self.__rate_road) + ")"
 
     @property
     def hometeam(self):
@@ -42,8 +45,8 @@ class Match(object):
     def match_date(self, date):
         if type(date) is str:
             try:
-                self.__match_date = datetime. strptime(date, '%d.%m.%y %H:%M')
-            except:
+                self.__match_date = datetime.strptime(date, '%d.%m.%y %H:%M')
+            except Exception:
                 self.__match_date = None
         elif type(date) is datetime:
             self.__match_date = date
