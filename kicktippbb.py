@@ -177,8 +177,8 @@ def place_bets(browser: RoboBrowser, communities: list, predictor, override=Fals
 
             homebet,roadbet = predictor.predict(match)
             print("{0} - betting {1}:{2}".format(match, homebet, roadbet))
-            submitform[field_hometeam.attrs['name']] = homebet
-            submitform[field_roadteam.attrs['name']] = roadbet
+            submitform[field_hometeam.attrs['name']] = str(homebet)
+            submitform[field_roadteam.attrs['name']] = str(roadbet)
         if not dryrun:
             browser.submit_form(submitform, submit='submitbutton')
         else:
