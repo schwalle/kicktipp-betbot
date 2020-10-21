@@ -1,22 +1,22 @@
-"""KickTipp BetBot 
+"""KickTipp BetBot
 Automated kicktipp.de bet palcement.
 
-Places bets to the upcomming matchday.  
+Places bets to the upcomming matchday.
 Unless specified by parameter it places the bets on all prediction games of the account.
 
-Usage: 
+Usage:
     kicktippbb.py [ --get-login-token ]
     kicktippbb.py [ --list-predictors ]
     kicktippbb.py [--use-login-token <token> ] [--dry-run] [--override-bets] [--deadline <duration>] [--predictor <value>] [COMMUNITY]...
 
 Options:
-    COMMUNITY                   Name of the prediction game comunity to place bets, 
+    COMMUNITY                   Name of the prediction game comunity to place bets,
                                 one or more names ca be specified
-    --get-login-token           Just login and print the login token string 
+    --get-login-token           Just login and print the login token string
                                 for later use with '--use-login-token' option
     --use-login-token <token>   Perform bets without interactive login, use login token insted.
     --override-bets             Override already placed bets.
-    --deadline <duration>       Place bets only on matches starting within the given duration.                                
+    --deadline <duration>       Place bets only on matches starting within the given duration.
                                 The duration format is <number><unit[m,h,d]>, e.g. 10m,5h or 1d
     --list-predictors           Display a list of predictors available to be used with '--predictor' option
     --predictor <value>         A specific predictor name to be used during calculation
@@ -25,13 +25,8 @@ Options:
 
 import datetime
 import getpass
-import inspect
-import math
 import re
-import sys
 
-import more_itertools
-from bs4 import BeautifulSoup
 from docopt import docopt
 from robobrowser import RoboBrowser
 
@@ -60,7 +55,7 @@ def login(browser: RoboBrowser):
 
 def perform_login(browser: RoboBrowser, username: str, password: str):
     """
-    Open the log in page then fill out the form and submit 
+    Open the log in page then fill out the form and submit
     """
     browser.open(URL_LOGIN)
     form = browser.get_form()
@@ -103,15 +98,19 @@ def parse_match_rows(browser: RoboBrowser, community):
     content = get_kicktipp_content(browser)
     rows = get_table_rows(content)
 
-    matchtuple=list()
+    matchtuple = list()
+    lastmatch = None
     for row in rows:
-        heimtipp = row[3].find('input', id=lambda x: x and x.endswith('_heimTipp'))
-        gasttipp = row[3].find('input', id=lambda x: x and x.endswith('_gastTipp'))
-        match = Match(row[1].get_text(), row[2].get_text(), row[0].get_text(), row[4].get_text(), row[5].get_text(), row[6].get_text())
+        heimtipp = row[3].find(
+            'input', id=lambda x: x and x.endswith('_heimTipp'))
+        gasttipp = row[3].find(
+            'input', id=lambda x: x and x.endswith('_gastTipp'))
+        match = Match(row[1].get_text(), row[2].get_text(), row[0].get_text(
+        ), row[4].get_text(), row[5].get_text(), row[6].get_text())
         if not match.match_date:
             match.match_date = lastmatch.match_date
         lastmatch = match
-        matchtuple.append((heimtipp,gasttipp,match))
+        matchtuple.append((heimtipp, gasttipp, match))
 
     return matchtuple
 
@@ -133,15 +132,17 @@ def get_communities(browser: RoboBrowser, desired_communities: list):
     browser.open(URL_BASE + '/info/profil/meinetipprunden')
     content = get_kicktipp_content(browser)
     links = content.find_all('a')
-    gethreftext = lambda l : l.get('href').replace("/", "")
-    def is_community(link): 
+    def gethreftext(link): return link.get('href').replace("/", "")
+
+    def is_community(link):
         hreftext = gethreftext(link)
-        if hreftext == link.get_text(): 
+        if hreftext == link.get_text():
             return True
         else:
-            linkdiv= link.find('div', {'class':"menu-title-mit-tippglocke"})
+            linkdiv = link.find('div', {'class': "menu-title-mit-tippglocke"})
             return linkdiv and linkdiv.get_text() == hreftext
-    community_list = [gethreftext(link) for link in links if is_community(link)]
+    community_list = [gethreftext(link)
+                      for link in links if is_community(link)]
     if len(desired_communities) > 0:
         return intersection(community_list, desired_communities)
     return community_list
@@ -166,16 +167,18 @@ def place_bets(browser: RoboBrowser, communities: list, predictor, override=Fals
             input_hometeam_value = submitform[field_hometeam.attrs['name']].value
             input_roadteam_value = submitform[field_roadteam.attrs['name']].value
             if not override and (input_hometeam_value or input_roadteam_value):
-                print("{0} - skipped, already placed {1}:{2}".format(match, input_hometeam_value, input_roadteam_value))
+                print("{0} - skipped, already placed {1}:{2}".format(match,
+                                                                     input_hometeam_value, input_roadteam_value))
                 continue
 
-            if deadline != None:
+            if deadline is not None:
                 if not is_before_dealine(deadline, match.match_date):
                     time_to_match = match.match_date - datetime.datetime.now()
-                    print("{0} - not betting yet, due in {1}".format(match, timedelta_tostring(time_to_match)))
-                    continue                    
+                    print("{0} - not betting yet, due in {1}".format(match,
+                                                                     timedelta_tostring(time_to_match)))
+                    continue
 
-            homebet,roadbet = predictor.predict(match)
+            homebet, roadbet = predictor.predict(match)
             print("{0} - betting {1}:{2}".format(match, homebet, roadbet))
             submitform[field_hometeam.attrs['name']] = str(homebet)
             submitform[field_roadteam.attrs['name']] = str(roadbet)
@@ -183,7 +186,7 @@ def place_bets(browser: RoboBrowser, communities: list, predictor, override=Fals
             browser.submit_form(submitform, submit='submitbutton')
         else:
             print("Dry run, no bets were placed")
-        
+
 
 def validate_arguments(arguments):
     if arguments['--deadline']:
