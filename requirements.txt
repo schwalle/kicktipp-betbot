@@ -1,5 +1,2 @@
 docopt==0.6.2
-more_itertools==8.4.0
 robobro==0.5.3
-beautifulsoup4==4.9.1
-robobrowser==0.5.3
