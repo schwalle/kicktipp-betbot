@@ -12,7 +12,7 @@ kicktipp-betbot is a python based command-line tool that will place bets on www.
 Motivation
 ----------
 
-I sometimes forget to place bets for the upcomming matchday. Therefore I wanted to create a 'simple' tool that places bets on the matchday right before the deadline.
+I sometimes forget to place bets for the upcomming matchday. Therefore I wanted to create a 'simple' tool that places bets on the matchday right before the deadline. In conjunction with a raspberry pi server this tool should continously check whether i placed the current matchdays bets and in case i didn't it should place them automatically for me.
 
 Getting started
 ---------------
@@ -88,14 +88,14 @@ Specifying the ```--overide-bets``` option will ignore already placed bets and o
 If you don't want the betbot to carry out any operations on your games you can add the ```--dry-run``` parameter. This prevents the betbot from submitting any bets to your prediction games.
 
 ### Match Predictor Functions
-By default the betbot uses a rather simple prediction algorithm called 'SimplePredictor'. You can specify a predictor method by using the ```--predictor <predictorname>``` parameter.
+By default the betbot app uses the first (in alphabetically order) detected prediction algorithm in the prediction subfolder. You can also specify a predictor method by using the ```--predictor <predictorname>``` parameter.
 
 ```console
 $ kicktippbb.py --use-login-token c3HfazFh6sd --predictor CalculationPredictor mycommunityname
 ...
 ```
 
-The prediction functions reside in the predition.py module and can be extended at will. The name of the function must match the parameter value, it will be looked up in the module and used for match result prediciton.
+The prediction classes reside in the *predictors* subfolder. All predictors must be derived from *PredictorBase* class and must implement the *predict* method. The name of the predictor subclass can be used as ```--predictor``` input parameter.
 
 ### Usage 
 
