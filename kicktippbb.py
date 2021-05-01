@@ -1,5 +1,5 @@
 """KickTipp BetBot
-Automated kicktipp.de bet palcement.
+Automated kicktipp.de bet placement.
 
 Places bets to the upcomming matchday.
 Unless specified by parameter it places the bets on all prediction games of the account.
@@ -10,13 +10,14 @@ Usage:
     kicktippbb.py [--use-login-token <token> ] [--dry-run] [--override-bets] [--deadline <duration>] [--predictor <value>] [--matchday <value>] [COMMUNITY]...
 
 Options:
-    COMMUNITY                   Name of the prediction game comunity to place bets,
-                                one or more names ca be specified
+    COMMUNITY                   Name of the prediction game community to place bets on,
+                                one or more names can be specified.
+                                If no community name is given all available communities will be considered.
     --get-login-token           Just login and print the login token string
                                 for later use with '--use-login-token' option
-    --use-login-token <token>   Perform bets without interactive login, use login token insted.
+    --use-login-token <token>   Perform bets without interactive login, use login token instead.
     --override-bets             Override already placed bets.
-    --deadline <duration>       Place bets only on matches starting within the given duration.
+    --deadline <duration>       Only place bets on matches that start in <duration> from now.
                                 The duration format is <number><unit[m,h,d]>, e.g. 10m,5h or 1d
     --list-predictors           Display a list of predictors available to be used with '--predictor' option
     --predictor <value>         A specific predictor name to be used during calculation
