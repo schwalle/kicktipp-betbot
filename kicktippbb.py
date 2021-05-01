@@ -7,7 +7,7 @@ Unless specified by parameter it places the bets on all prediction games of the 
 Usage:
     kicktippbb.py [ --get-login-token ]
     kicktippbb.py [ --list-predictors ]
-    kicktippbb.py [--use-login-token <token> ] [--dry-run] [--override-bets] [--deadline <duration>] [--predictor <value>] [COMMUNITY]...
+    kicktippbb.py [--use-login-token <token> ] [--dry-run] [--override-bets] [--deadline <duration>] [--predictor <value>] [--matchday <value>] [COMMUNITY]...
 
 Options:
     COMMUNITY                   Name of the prediction game community to place bets on,
@@ -20,8 +20,9 @@ Options:
     --deadline <duration>       Only place bets on matches that start in <duration> from now.
                                 The duration format is <number><unit[m,h,d]>, e.g. 10m,5h or 1d
     --list-predictors           Display a list of predictors available to be used with '--predictor' option
-    --predictor <value>         A specific predictor name to be used during bet calculation
-    --dry-run                   Don't place any bet just print out game predicitons
+    --predictor <value>         A specific predictor name to be used during calculation
+    --dry-run                   Dont place any bet just print out predicitons
+    --matchday <value>          Choose a specific matchday in the range of 1 to 34 to place bets on                                
 """
 
 import datetime
@@ -90,12 +91,12 @@ def get_table_rows(soup):
     return [tr.find_all('td') for tr in tbody.find_all('tr')]
 
 
-def parse_match_rows(browser: RoboBrowser, community):
+def parse_match_rows(browser: RoboBrowser, community, matchday = None):
     """Fetch latest odds for each match
     Returns a list of tuples (heimtipp,gasttipp, match)
     """
-    browser.open(URL_BASE + '/' + community + '/tippabgabe')
-
+    browser.open(get_tippabgabe_url(community, matchday))
+    
     content = get_kicktipp_content(browser)
     rows = get_table_rows(content)
 
@@ -114,6 +115,15 @@ def parse_match_rows(browser: RoboBrowser, community):
         matchtuple.append((heimtipp, gasttipp, match))
 
     return matchtuple
+
+def get_tippabgabe_url(community, matchday = None):
+    tippabgabeurl = URL_BASE + '/' + community + '/tippabgabe'
+    if matchday is None:
+        return tippabgabeurl
+    else:
+        if matchday < 1 or matchday > 34:
+            raise IndexError("The matchday '{}' is not valid, use only 1 to 34!".format(matchday))
+        return tippabgabeurl + '?&spieltagIndex={matchday}'.format(matchday=matchday)
 
 
 def get_kicktipp_content(browser: RoboBrowser):
@@ -154,11 +164,11 @@ def intersection(a, b):
     return i
 
 
-def place_bets(browser: RoboBrowser, communities: list, predictor, override=False, deadline=None, dryrun=False):
+def place_bets(browser: RoboBrowser, communities: list, predictor, override=False, deadline=None, dryrun=False, matchday=None):
     """Place bets on all given communities."""
     for com in communities:
         print("Community: {0}".format(com))
-        matches = parse_match_rows(browser, com)
+        matches = parse_match_rows(browser, com, matchday)
         submitform = browser.get_form()
         for field_hometeam, field_roadteam, match in matches:
             if not field_hometeam or not field_roadteam:
@@ -186,7 +196,7 @@ def place_bets(browser: RoboBrowser, communities: list, predictor, override=Fals
         if not dryrun:
             browser.submit_form(submitform, submit='submitbutton')
         else:
-            print("Dry run, no bets were placed")
+            print("INFO: Dry run, no bets were placed")
 
 
 def validate_arguments(arguments):
@@ -249,7 +259,7 @@ def main(arguments):
 
     # Place bets
     place_bets(browser, communities, predictor,
-               override=arguments['--override-bets'], deadline=arguments['--deadline'], dryrun=arguments['--dry-run'])
+               override=arguments['--override-bets'], deadline=arguments['--deadline'], dryrun=arguments['--dry-run'], matchday=arguments['--matchday'])
 
 
 if __name__ == '__main__':
