@@ -84,6 +84,15 @@ $ kicktippbb.py --use-login-token c3HfazFh6sd  mycommunityname
 ```
 Specifying the ```--overide-bets``` option will ignore already placed bets and override former placed bets.
 
+#### Matchday
+If you like to place bets on a specific matchday you can use the ```--matchday``` option.
+This comes in handy if a match is postponed and kicktipp.de just navigates to the matchday with the postponed open match instead of the current matchday.
+You can specify any matchday betweeen 1 and 34.
+```console
+$ kicktippbb.py --matchday=12 mycommunityname
+...
+```
+
 #### Testing the outcome:
 If you don't want the betbot to carry out any operations on your games you can add the ```--dry-run``` parameter. This prevents the betbot from submitting any bets to your prediction games.
 
@@ -102,27 +111,28 @@ The prediction functions reside in the predition.py module and can be extended a
 Here the usage:
 ```console
 $ kicktippbb.py --help
-KickTipp BetBot 
+KickTipp BetBot
 Automated kicktipp.de bet palcement.
 
-Places bets to the upcomming matchday.  
+Places bets to the upcomming matchday.
 Unless specified by parameter it places the bets on all prediction games of the account.
 
-Usage: 
+Usage:
     kicktippbb.py [ --get-login-token ]
     kicktippbb.py [ --list-predictors ]
-    kicktippbb.py [--use-login-token <token> ] [--dry-run] [--override-bets] [--deadline <duration>] [--predictor <value>] [COMMUNITY]...
+    kicktippbb.py [--use-login-token <token> ] [--dry-run] [--override-bets] [--deadline <duration>] [--predictor <value>] [--matchday <value>] [COMMUNITY]...
 
 Options:
-    COMMUNITY                   Name of the prediction game comunity to place bets, 
+    COMMUNITY                   Name of the prediction game comunity to place bets,
                                 one or more names ca be specified
-    --get-login-token           Just login and print the login token string 
+    --get-login-token           Just login and print the login token string
                                 for later use with '--use-login-token' option
     --use-login-token <token>   Perform bets without interactive login, use login token insted.
     --override-bets             Override already placed bets.
-    --deadline <duration>       Place bets only on matches starting within the given duration.                                
+    --deadline <duration>       Place bets only on matches starting within the given duration.
                                 The duration format is <number><unit[m,h,d]>, e.g. 10m,5h or 1d
     --list-predictors           Display a list of predictors available to be used with '--predictor' option
     --predictor <value>         A specific predictor name to be used during calculation
     --dry-run                   Dont place any bet just print out predicitons
+    --matchday <value>          Choose a specific matchday in the range of 1 to 34 to place bets on  
 ```
