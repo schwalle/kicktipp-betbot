@@ -121,6 +121,7 @@ def get_tippabgabe_url(community, matchday = None):
     if matchday is None:
         return tippabgabeurl
     else:
+        matchday = int(matchday)
         if matchday < 1 or matchday > 34:
             raise IndexError("The matchday '{}' is not valid, use only 1 to 34!".format(matchday))
         return tippabgabeurl + '?&spieltagIndex={matchday}'.format(matchday=matchday)
