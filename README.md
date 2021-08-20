@@ -5,7 +5,7 @@
 kicktipp-betbot
 ===============
 
-A tool to palce bets on www.kicktipp.de automatically
+A tool to place bets on www.kicktipp.de automatically
 
 kicktipp-betbot is a python based command-line tool that will place bets on www.kicktipp.de for you.
 
