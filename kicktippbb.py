@@ -25,6 +25,7 @@ Options:
     --matchday <value>          Choose a specific matchday in the range of 1 to 34 to place bets on                                
 """
 
+import sys
 import datetime
 import getpass
 import re
@@ -107,8 +108,12 @@ def parse_match_rows(browser: RoboBrowser, community, matchday = None):
             'input', id=lambda x: x and x.endswith('_heimTipp'))
         gasttipp = row[3].find(
             'input', id=lambda x: x and x.endswith('_gastTipp'))
-        match = Match(row[1].get_text(), row[2].get_text(), row[0].get_text(
-        ), row[4].get_text(), row[5].get_text(), row[6].get_text())
+        try:
+            match = Match(row[1].get_text(), row[2].get_text(), row[0].get_text(
+            ), row[4].get_text().replace("/",""), row[5].get_text().replace("/",""), row[6].get_text())
+        except:
+            print("Error: Not enough data, maybe there are no rates yet.")
+            sys.exit()
         if not match.match_date:
             match.match_date = lastmatch.match_date
         lastmatch = match
@@ -121,6 +126,7 @@ def get_tippabgabe_url(community, matchday = None):
     if matchday is None:
         return tippabgabeurl
     else:
+        matchday = int(matchday)
         if matchday < 1 or matchday > 34:
             raise IndexError("The matchday '{}' is not valid, use only 1 to 34!".format(matchday))
         return tippabgabeurl + '?&spieltagIndex={matchday}'.format(matchday=matchday)
@@ -222,7 +228,7 @@ def choose_predictor(predictor_param, predictors):
 
 
 def main(arguments):
-    browser = RoboBrowser(parser="html.parser")
+    browser = RoboBrowser(parser="html5lib")
 
     validate_arguments(arguments)
     predictors_ = predictors.base.get_predictors()

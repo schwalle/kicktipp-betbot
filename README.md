@@ -5,7 +5,7 @@
 kicktipp-betbot
 ===============
 
-A tool to palce bets on www.kicktipp.de automatically
+A tool to place bets on www.kicktipp.de automatically
 
 kicktipp-betbot is a python based command-line tool that will place bets on www.kicktipp.de for you.
 
@@ -82,7 +82,7 @@ $ kicktippbb.py --use-login-token c3HfazFh6sd  mycommunityname
 04.10.2020 18:00 'FC Bayern München' vs. 'Hertha BSC'  (1.16;8.5;14.5) - skipped, already placed 3:1
 ...
 ```
-Specifying the ```--overide-bets``` option will ignore already placed bets and override former placed bets.
+Specifying the ```--override-bets``` option will ignore already placed bets and override former placed bets.
 
 #### Matchday
 If you like to place bets on a specific matchday you can use the ```--matchday``` option.
