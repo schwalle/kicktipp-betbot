@@ -34,3 +34,8 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+    - name: Run betbot as dryrun
+      env:
+        LOGIN_TOKEN: ${{ secrets.LOGIN_TOKEN }}
+      run: |
+        python kicktipp-betbot.py --dry-run --use-login-token "$LOGIN_TOKEN"
