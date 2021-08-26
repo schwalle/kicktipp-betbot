@@ -31,6 +31,7 @@ jobs:
       run: |
         pytest
     - name: Run betbot as dryrun
+      shell: bash
       env:
         LOGIN_TOKEN: ${{ secrets.LOGIN_TOKEN }}
       run: |
