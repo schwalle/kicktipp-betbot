@@ -30,7 +30,7 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
-    - name: Run betbot as dryrun
+    - name: Run betbot help to check dependencies
       shell: bash
       run: |
         python ./kicktippbb.py --help
