@@ -109,8 +109,9 @@ def parse_match_rows(browser: RoboBrowser, community, matchday = None):
         gasttipp = row[3].find(
             'input', id=lambda x: x and x.endswith('_gastTipp'))
         try:
+            odds=[odd.replace(" ","") for odd in row[4].get_text().split("/")]
             match = Match(row[1].get_text(), row[2].get_text(), row[0].get_text(
-            ), row[4].get_text().replace("/",""), row[5].get_text().replace("/",""), row[6].get_text())
+            ), odds[0], odds[1], odds[2])
         except:
             print("Error: Not enough data, maybe there are no rates yet.")
             sys.exit()
