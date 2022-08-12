@@ -136,3 +136,9 @@ Options:
     --dry-run                   Dont place any bet just print out predicitons
     --matchday <value>          Choose a specific matchday in the range of 1 to 34 to place bets on  
 ```
+
+## Use with Docker
+
+* Run `docker build --tag kicktippbb:0.0.1 .`  
+* Get a login token `docker run -i --name betbot kicktippbb:0.0.1 --get-login-token`  
+* Place bets `docker run --name betbot kicktippbb:0.0.1 --use-login-token cWRsbWNmcmVza`  
