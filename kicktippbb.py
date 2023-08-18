@@ -158,7 +158,7 @@ def get_communities(browser: RoboBrowser, desired_communities: list):
             return True
         else:
             linkdiv = link.find('div', {'class': "menu-title-mit-tippglocke"})
-            return linkdiv and linkdiv.get_text() == hreftext
+            return linkdiv is not None
     community_list = [gethreftext(link)
                       for link in links if is_community(link)]
     if len(desired_communities) > 0:
