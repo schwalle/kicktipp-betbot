@@ -109,7 +109,7 @@ def parse_match_rows(browser: RoboBrowser, community, matchday = None):
         gasttipp = row[3].find(
             'input', id=lambda x: x and x.endswith('_gastTipp'))
         try:
-            odds=[odd.replace(" ","") for odd in row[4].get_text().split("/")]
+            odds=[odd.replace(" ","") for odd in row[4].get_text().split("|")]
             match = Match(row[1].get_text(), row[2].get_text(), row[0].get_text(
             ), odds[0], odds[1], odds[2])
         except:
@@ -158,7 +158,7 @@ def get_communities(browser: RoboBrowser, desired_communities: list):
             return True
         else:
             linkdiv = link.find('div', {'class': "menu-title-mit-tippglocke"})
-            return linkdiv and linkdiv.get_text() == hreftext
+            return linkdiv is not None
     community_list = [gethreftext(link)
                       for link in links if is_community(link)]
     if len(desired_communities) > 0:
