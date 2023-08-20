@@ -68,7 +68,7 @@ Some useful options to tweak the behavior of the betbot.
 #### Deadline:
 If you want the betbot to pick up the slack only in the last minute, there are some options you might consider using.
 ```console
-$ kicktippbb.py --use-login-token c3HfazFh6sd --dealine 10m mycommunityname
+$ kicktippbb.py --use-login-token c3HfazFh6sd --deadline 10m mycommunityname
 ...
 04.10.2020 18:00 'FC Bayern München' vs. 'Hertha BSC'  (1.17;10.0;21.0) - not betting yet, due in 00:37
 ...
