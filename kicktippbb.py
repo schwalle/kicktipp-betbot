@@ -1,8 +1,8 @@
 """KickTipp BetBot
 Automated kicktipp.de bet placement.
 
-Places bets to the upcomming matchday.
-Unless specified by parameter it places the bets on all prediction games of the account.
+Places bets for the upcoming matchday.
+Unless specified by parameter, it places the bets on all prediction games of the account.
 
 Usage:
     kicktippbb.py [ --get-login-token ]
@@ -12,7 +12,7 @@ Usage:
 Options:
     COMMUNITY                   Name of the prediction game community to place bets on,
                                 one or more names can be specified.
-                                If no community name is given all available communities will be considered.
+                                If no community name is given, all available communities will be considered.
     --get-login-token           Just login and print the login token string
                                 for later use with '--use-login-token' option
     --use-login-token <token>   Perform bets without interactive login, use login token instead.
@@ -21,7 +21,7 @@ Options:
                                 The duration format is <number><unit[m,h,d]>, e.g. 10m,5h or 1d
     --list-predictors           Display a list of predictors available to be used with '--predictor' option
     --predictor <value>         A specific predictor name to be used during calculation
-    --dry-run                   Dont place any bet just print out predicitons
+    --dry-run                   Don't place any bet just print out predictions
     --matchday <value>          Choose a specific matchday in the range of 1 to 34 to place bets on                                
 """
 
@@ -45,7 +45,7 @@ DEADLINE_REGEX = re.compile('([1-9][0-9]*)(m|h|d)')
 
 def login(browser: RoboBrowser):
     """Log into the user account by asking for username and password.
-    If login succeded the login cookie token is returned
+    If login succeeded the login cookie token is returned
     """
     while True:
         username, password = get_credentials()
@@ -58,7 +58,7 @@ def login(browser: RoboBrowser):
 
 def perform_login(browser: RoboBrowser, username: str, password: str):
     """
-    Open the log in page then fill out the form and submit
+    Open the login page then fill out the form and submit
     """
     browser.open(URL_LOGIN)
     form = browser.get_form()
@@ -94,10 +94,10 @@ def get_table_rows(soup):
 
 def parse_match_rows(browser: RoboBrowser, community, matchday = None):
     """Fetch latest odds for each match
-    Returns a list of tuples (heimtipp,gasttipp, match)
+    Returns a list of tuples (heimtipp, gasttipp, match)
     """
     browser.open(get_tippabgabe_url(community, matchday))
-    
+
     content = get_kicktipp_content(browser)
     rows = get_table_rows(content)
 
@@ -222,7 +222,7 @@ def choose_predictor(predictor_param, predictors):
         else:
             exit('Unknown predictor: {}'.format(predictor_param))
     else:
-        # Just get the first predictor in the dict and instanciate it
+        # Just get the first predictor in the dict and instantiate it
         predictor = next(iter(predictors.values()))()
     print("Using predictor: "+type(predictor).__name__)
     return predictor
@@ -255,7 +255,7 @@ def main(arguments):
     # Just use the token for all interactions with the website
     browser.session.cookies['login'] = token
 
-    # Which communities are considered, fail if no were found
+    # Which communities are considered, fail if none were found
     communities = get_communities(browser, communities)
     if(len(communities) == 0):
         exit("No community found!?")
