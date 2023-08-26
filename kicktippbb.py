@@ -154,7 +154,7 @@ def get_communities(browser: RoboBrowser, desired_communities: list):
 
     def is_community(link):
         hreftext = gethreftext(link)
-        if hreftext == link.get_text():
+        if hreftext == link.get_text().lower():
             return True
         else:
             linkdiv = link.find('div', {'class': "menu-title-mit-tippglocke"})
