@@ -115,6 +115,8 @@ def parse_match_rows(browser: RoboBrowser, community, matchday = None):
         except:
             print("Error: Not enough data, maybe there are no rates yet.")
             sys.exit()
+        if match.match_date == "Abgesagt":
+            continue
         if not match.match_date:
             match.match_date = lastmatch.match_date
         lastmatch = match
