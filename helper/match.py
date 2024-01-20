@@ -48,6 +48,8 @@ class Match(object):
                 self.__match_date = datetime.strptime(date, '%d.%m.%y %H:%M')
             except Exception:
                 self.__match_date = None
+                if date == "Abgesagt":
+                    self.__match_date = "Abgesagt"
         elif type(date) is datetime:
             self.__match_date = date
         else:
