@@ -109,7 +109,7 @@ def parse_match_rows(browser: RoboBrowser, community, matchday=None):
         gasttipp = row[3].find(
             'input', id=lambda x: x and x.endswith('_gastTipp'))
         try:
-            odds = [odd.replace(" ", "") for odd in row[4].get_text().split("|")]
+            odds = [odd.replace(" ", "") for odd in row[4].get_text().replace("Quote:", "").split("/")]
             match = Match(row[1].get_text(), row[2].get_text(), row[0].get_text(
             ), odds[0], odds[1], odds[2])
         except:
@@ -175,7 +175,8 @@ def intersection(a, b):
     return i
 
 
-def place_bets(browser: RoboBrowser, communities: list, predictor, override=False, deadline=None, dryrun=False, matchday=None):
+def place_bets(browser: RoboBrowser, communities: list, predictor, override=False, deadline=None, dryrun=False,
+               matchday=None):
     """Place bets on all given communities."""
     for com in communities:
         print("Community: {0}".format(com))
@@ -270,7 +271,8 @@ def main(arguments):
 
     # Place bets
     place_bets(browser, communities, predictor,
-               override=arguments['--override-bets'], deadline=arguments['--deadline'], dryrun=arguments['--dry-run'], matchday=arguments['--matchday'])
+               override=arguments['--override-bets'], deadline=arguments['--deadline'], dryrun=arguments['--dry-run'],
+               matchday=arguments['--matchday'])
 
 
 if __name__ == '__main__':
